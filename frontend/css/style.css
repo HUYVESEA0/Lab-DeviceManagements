@@ -82,6 +82,146 @@ body {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+/* Room Card Styling */
+.room-card {
+    border-radius: 0.5rem;
+    border: 2px solid #dee2e6;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    padding: 1.5rem;
+    text-align: center;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.room-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+    transform: translateY(-4px);
+}
+
+.room-card.selected {
+    background-color: #e7f3ff;
+    border-color: var(--primary-color);
+}
+
+.room-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.room-status {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 2rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.room-status.available {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.room-status.in_use {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.room-status.maintenance {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.room-info {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 0.5rem;
+}
+
+/* Device Card Styling */
+.device-card {
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: white;
+    transition: all 0.2s ease;
+}
+
+.device-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.device-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 0.75rem;
+}
+
+.device-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.device-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.25rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.device-status.available {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.device-status.in_use {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.device-status.maintenance {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.device-status.broken {
+    background-color: #e2e3e5;
+    color: #383d41;
+}
+
+.device-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin: 0.75rem 0;
+}
+
+.device-detail-item {
+    font-size: 0.9rem;
+}
+
+.device-detail-label {
+    font-weight: 600;
+    color: #666;
+}
+
+.device-room-badge {
+    background-color: #e7f3ff;
+    color: var(--primary-color);
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.25rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .card-body {
@@ -91,5 +231,9 @@ body {
     .btn-sm {
         padding: 0.25rem 0.5rem;
         font-size: 0.75rem;
+    }
+    
+    .device-details {
+        grid-template-columns: 1fr;
     }
 }

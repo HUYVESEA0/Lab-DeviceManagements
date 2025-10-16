@@ -1,23 +1,137 @@
 // App State
 let currentDevices = [];
 let currentCategories = [];
+let currentRooms = [];
+let currentUser = null;
+let selectedRoomFilter = null;
 let deviceModal, categoryModal;
 
 // Initialize
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     deviceModal = new bootstrap.Modal(document.getElementById('deviceModal'));
     categoryModal = new bootstrap.Modal(document.getElementById('categoryModal'));
     
-    loadCategories();
-    loadDevices();
+    // Check login status
+    await checkLoginStatus();
+    
+    // Load data
+    await loadRooms();
+    await loadCategories();
+    await loadDevices();
     setupEventListeners();
 });
+
+// Check Login Status
+async function checkLoginStatus() {
+    try {
+        const user = await api.auth.me();
+        currentUser = user;
+        document.getElementById('currentUsername').textContent = user.full_name || user.username;
+    } catch (error) {
+        console.error('Not logged in:', error);
+        // Redirect to login page
+        window.location.href = 'login.html';
+    }
+}
+
+// Handle Logout
+async function handleLogout() {
+    try {
+        await api.auth.logout();
+        window.location.href = 'login.html';
+    } catch (error) {
+        console.error('Logout error:', error);
+        showAlert('Lỗi khi đăng xuất', 'danger');
+    }
+}
 
 // Event Listeners
 function setupEventListeners() {
     document.getElementById('searchDevice').addEventListener('input', loadDevices);
     document.getElementById('filterStatus').addEventListener('change', loadDevices);
     document.getElementById('filterCategory').addEventListener('change', loadDevices);
+    document.getElementById('filterRoom').addEventListener('change', (e) => {
+        selectedRoomFilter = e.target.value ? parseInt(e.target.value) : null;
+        loadDevices();
+    });
+}
+
+// Load Rooms
+async function loadRooms() {
+    try {
+        const response = await api.rooms.list({ per_page: 100 });
+        currentRooms = response.data;
+        renderRooms();
+        populateRoomSelect();
+    } catch (error) {
+        console.error('Error loading rooms:', error);
+        showAlert('Lỗi khi tải danh sách phòng', 'danger');
+    }
+}
+
+// Render Rooms
+function renderRooms() {
+    const container = document.getElementById('roomsGrid');
+    
+    if (currentRooms.length === 0) {
+        container.innerHTML = '<p class="text-muted col-12 text-center py-4">Không có phòng nào</p>';
+        return;
+    }
+    
+    const statusLabelMap = {
+        'available': 'Sẵn có',
+        'in_use': 'Đang sử dụng',
+        'maintenance': 'Bảo trì',
+        'closed': 'Đóng cửa'
+    };
+    
+    const html = currentRooms.map(room => `
+        <div class="col-md-4 col-lg-3 col-xl-2 mb-3">
+            <div class="room-card" onclick="selectRoomFilter(${room.id})">
+                <div>
+                    <div class="room-number">Phòng ${room.room_number}</div>
+                    <div class="room-info">
+                        <strong>${room.name}</strong><br>
+                        <small>${room.location || 'N/A'}</small><br>
+                        <small>Sức chứa: ${room.capacity || 'N/A'}</small>
+                    </div>
+                </div>
+                <div class="room-status ${room.status}">
+                    ${statusLabelMap[room.status]}
+                </div>
+            </div>
+        </div>
+    `).join('');
+    
+    container.innerHTML = html;
+}
+
+// Select Room Filter
+function selectRoomFilter(roomId) {
+    const filterSelect = document.getElementById('filterRoom');
+    selectedRoomFilter = selectedRoomFilter === roomId ? null : roomId;
+    filterSelect.value = selectedRoomFilter || '';
+    
+    // Update room card visual states
+    document.querySelectorAll('.room-card').forEach((card, index) => {
+        if (currentRooms[index].id === selectedRoomFilter) {
+            card.classList.add('selected');
+        } else {
+            card.classList.remove('selected');
+        }
+    });
+    
+    loadDevices();
+}
+
+// Populate Room Select
+function populateRoomSelect() {
+    const select = document.getElementById('filterRoom');
+    const options = currentRooms.map(room => 
+        `<option value="${room.id}">Phòng ${room.room_number} - ${room.name}</option>`
+    ).join('');
+    
+    select.innerHTML = '<option value="">-- Tất cả phòng --</option>' + options;
 }
 
 // Load Devices
@@ -26,7 +140,8 @@ async function loadDevices() {
         const filters = {
             search: document.getElementById('searchDevice').value,
             status: document.getElementById('filterStatus').value,
-            category_id: document.getElementById('filterCategory').value || undefined
+            category_id: document.getElementById('filterCategory').value || undefined,
+            room_id: selectedRoomFilter || undefined
         };
         
         const response = await api.devices.list(filters);
@@ -47,13 +162,6 @@ function renderDevices() {
         return;
     }
     
-    const statusBadgeMap = {
-        'available': 'success',
-        'in_use': 'info',
-        'maintenance': 'warning',
-        'broken': 'danger'
-    };
-    
     const statusLabelMap = {
         'available': 'Sẵn có',
         'in_use': 'Đang sử dụng',
@@ -61,37 +169,50 @@ function renderDevices() {
         'broken': 'Hỏng'
     };
     
-    const html = currentDevices.map(device => `
-        <div class="card mb-2">
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col-md-6">
-                        <h6 class="mb-0">${device.name}</h6>
+    const html = currentDevices.map(device => {
+        let roomInfo = '';
+        if (device.room_id && device.room && device.room.room_number) {
+            roomInfo = `<span class="device-room-badge">📍 Phòng ${device.room.room_number}</span>`;
+        }
+        
+        return `
+            <div class="device-card">
+                <div class="device-header">
+                    <div>
+                        <div class="device-name">${device.name}</div>
                         <small class="text-muted">Serial: ${device.serial_number}</small>
-                        <br>
-                        <small class="text-muted">Danh mục: ${device.category}</small>
                     </div>
-                    <div class="col-md-2">
-                        <span class="badge bg-${statusBadgeMap[device.status]}">
-                            ${statusLabelMap[device.status]}
-                        </span>
+                    <span class="device-status ${device.status}">
+                        ${statusLabelMap[device.status]}
+                    </span>
+                </div>
+                <div class="device-details">
+                    <div class="device-detail-item">
+                        <span class="device-detail-label">Danh mục:</span> ${device.category}
                     </div>
-                    <div class="col-md-2">
-                        <small class="text-muted">SL: ${device.quantity}</small>
-                        ${device.location ? `<br><small class="text-muted">Vị trí: ${device.location}</small>` : ''}
+                    <div class="device-detail-item">
+                        <span class="device-detail-label">Số lượng:</span> ${device.quantity}
                     </div>
-                    <div class="col-md-2 text-end">
-                        <button class="btn btn-sm btn-primary" onclick="editDevice(${device.id})">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteDevice(${device.id})">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                    <div class="device-detail-item">
+                        <span class="device-detail-label">Model:</span> ${device.model || 'N/A'}
+                    </div>
+                    <div class="device-detail-item">
+                        <span class="device-detail-label">Vị trí:</span> ${device.location || 'N/A'}
                     </div>
                 </div>
+                ${roomInfo}
+                ${device.description ? `<p class="text-muted small mb-2">${device.description}</p>` : ''}
+                <div class="text-end">
+                    <button class="btn btn-sm btn-primary" onclick="editDevice(${device.id})">
+                        <i class="fas fa-edit"></i> Sửa
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteDevice(${device.id})">
+                        <i class="fas fa-trash"></i> Xóa
+                    </button>
+                </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
     
     container.innerHTML = html;
 }

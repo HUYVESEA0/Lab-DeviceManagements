@@ -11,9 +11,6 @@ class Category(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # Relationship
-    devices = db.relationship('Device', backref='category', lazy=True, cascade='all, delete-orphan')
-    
     def __repr__(self):
         return f'<Category {self.name}>'
     
@@ -25,3 +22,4 @@ class Category(db.Model):
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat()
         }
+

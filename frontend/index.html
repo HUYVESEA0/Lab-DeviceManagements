@@ -23,7 +23,20 @@
                         <a class="nav-link active" href="#devices-section">Thiết Bị</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="#rooms-section">Phòng</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="#categories-section">Danh Mục</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i> <span id="currentUsername">Guest</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="#">Thông tin cá nhân</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="handleLogout()">Đăng Xuất</a></li>
+                        </ul>
                     </li>
                 </ul>
             </div>
@@ -31,6 +44,20 @@
     </nav>
 
     <div class="container-fluid py-4">
+        <!-- Rooms Section -->
+        <div id="rooms-section" class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-door-open"></i> Sơ Đồ Phòng Thực Hành
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="roomsGrid" class="row">
+                    <!-- Rooms will be loaded here -->
+                </div>
+            </div>
+        </div>
+
         <!-- Devices Section -->
         <div id="devices-section" class="card mb-4">
             <div class="card-header bg-primary text-white">
@@ -40,10 +67,10 @@
             </div>
             <div class="card-body">
                 <div class="row mb-3">
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <input type="text" id="searchDevice" class="form-control" placeholder="Tìm kiếm thiết bị...">
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <select id="filterStatus" class="form-control">
                             <option value="">-- Tất cả trạng thái --</option>
                             <option value="available">Sẵn có</option>
@@ -52,12 +79,17 @@
                             <option value="broken">Hỏng</option>
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <select id="filterCategory" class="form-control">
                             <option value="">-- Tất cả danh mục --</option>
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
+                        <select id="filterRoom" class="form-control">
+                            <option value="">-- Tất cả phòng --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
                         <button class="btn btn-success w-100" onclick="showAddDeviceModal()">
                             <i class="fas fa-plus"></i> Thêm Thiết Bị
                         </button>
