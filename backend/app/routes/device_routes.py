@@ -9,6 +9,31 @@ from app.schemas.device_schema import DeviceSchema
 schema = DeviceSchema()
 
 
+@device_bp.route('/status/<string:status>', methods=['GET'])
+def get_devices_by_status(status):
+    """Get devices filtered by status"""
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    valid_statuses = [
+        'available', 'in_use', 'maintenance', 'broken'
+    ]
+    if status not in valid_statuses:
+        return jsonify(
+            {'error': f'Invalid status. Valid: {valid_statuses}'}
+        ), 400
+    
+    query = Device.query.filter_by(status=status)
+    paginated = query.paginate(page=page, per_page=per_page)
+    
+    return jsonify({
+        'data': [device.to_dict() for device in paginated.items],
+        'total': paginated.total,
+        'pages': paginated.pages,
+        'current_page': page
+    }), 200
+
+
 @device_bp.route('', methods=['GET'])
 def get_devices():
     """Get all devices with filtering, sorting and pagination"""
@@ -138,28 +163,3 @@ def delete_device(device_id):
         return jsonify({'error': str(e)}), 400
     
     return '', 204
-
-
-@device_bp.route('/status/<string:status>', methods=['GET'])
-def get_devices_by_status(status):
-    """Get devices filtered by status"""
-    page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 10, type=int)
-    
-    valid_statuses = [
-        'available', 'in_use', 'maintenance', 'broken'
-    ]
-    if status not in valid_statuses:
-        return jsonify(
-            {'error': f'Invalid status. Valid: {valid_statuses}'}
-        ), 400
-    
-    query = Device.query.filter_by(status=status)
-    paginated = query.paginate(page=page, per_page=per_page)
-    
-    return jsonify({
-        'data': [device.to_dict() for device in paginated.items],
-        'total': paginated.total,
-        'pages': paginated.pages,
-        'current_page': page
-    }), 200

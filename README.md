@@ -63,7 +63,33 @@ Lab-DeviceManagements/
 
 ## Cài Đặt
 
-### Backend Setup
+### ⚡ Cách Nhanh Nhất (Chạy Cả Backend + Frontend)
+
+**Windows:**
+```bash
+# Chỉ cần chạy:
+run_all.bat
+```
+
+**macOS / Linux:**
+```bash
+# Chỉ cần chạy:
+./run_all.sh
+chmod +x run_all.sh  # (Lần đầu tiên)
+./run_all.sh
+```
+
+Script sẽ tự động:
+- ✅ Cài đặt dependencies
+- ✅ Chạy Flask backend (port 5000)
+- ✅ Chạy Frontend HTTP server (port 8000)
+- ✅ Mở ứng dụng trong trình duyệt
+
+---
+
+### Manual Setup
+
+#### Backend Setup
 
 1. **Cài đặt dependencies:**
 ```bash
@@ -85,7 +111,7 @@ python run.py
 ```
 Server sẽ chạy tại `http://localhost:5000`
 
-### Frontend Setup
+#### Frontend Setup
 
 1. **Mở frontend:**
 Đơn giản mở file `frontend/index.html` trong trình duyệt, hoặc sử dụng Live Server

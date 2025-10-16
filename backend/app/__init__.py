@@ -27,6 +27,10 @@ def create_app():
     app.register_blueprint(device_bp, url_prefix='/api/devices')
     app.register_blueprint(category_bp, url_prefix='/api/categories')
     
+    @app.route('/')
+    def index():
+        return {'message': 'Lab Device Management API', 'version': '1.0', 'status': 'running'}, 200
+    
     @app.route('/api/health')
     def health():
         return {'status': 'ok'}, 200
